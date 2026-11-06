@@ -11,8 +11,8 @@ export function ContactCta({ locale = "en" }: { locale?: Locale }) {
   return (
     <section id="contact" aria-labelledby="contact-title" className="night py-24 md:py-32">
       <Container width="wide">
-        <div className="grid gap-10 md:grid-cols-12 md:gap-8">
-          <div className="md:col-span-8">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-8">
             <h2 id="contact-title" className="text-step-5">
               {t.title}
             </h2>
@@ -21,7 +21,7 @@ export function ContactCta({ locale = "en" }: { locale?: Locale }) {
             </p>
             <p className="mt-4 text-muted">{getSite(locale).availability}</p>
           </div>
-          <div className="flex flex-col items-start gap-3 self-end md:col-span-4">
+          <div className="flex flex-col items-start gap-3 self-end lg:col-span-4">
             <a href={`mailto:${siteConfig.email}`} dir="ltr" className="inline-flex items-center gap-2 rounded-full bg-night-ink px-5 py-2.5 font-medium text-night transition-opacity hover:opacity-85">
               <IconMail /> {siteConfig.email}
             </a>

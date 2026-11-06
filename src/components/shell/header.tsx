@@ -21,8 +21,8 @@ export function Header({ locale = "en" }: { locale?: Locale }) {
           {siteConfig.name}
         </Link>
 
-        <nav aria-label={t.navAria.primary} className="hidden md:block">
-          <ul className="flex items-center gap-6 lg:gap-8">
+        <nav aria-label={t.navAria.primary} className="hidden lg:block">
+          <ul className="flex items-center gap-5 lg:gap-8">
             {nav.map((item) => (
               <li key={item.href}>
                 <NavLink href={item.href} label={item.label} />
@@ -31,17 +31,17 @@ export function Header({ locale = "en" }: { locale?: Locale }) {
           </ul>
         </nav>
 
-        <div className="hidden shrink-0 items-center gap-2 md:flex">
+        <div className="hidden shrink-0 items-center gap-2 lg:flex">
           <LanguageSwitch locale={locale} />
           <ThemeToggle labels={t.theme} />
           <a
             href={siteConfig.resumePath}
             download
             aria-label={t.downloadCv}
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-3 py-2 text-step--1 font-medium text-paper transition-opacity hover:opacity-85 lg:px-4"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-3 py-2 text-step--1 font-medium text-paper transition-opacity hover:opacity-85 xl:px-4"
           >
             <IconDownload />
-            <span className="hidden lg:inline">{t.downloadCv}</span>
+            <span className="hidden xl:inline">{t.downloadCv}</span>
           </a>
         </div>
 

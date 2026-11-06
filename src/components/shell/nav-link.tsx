@@ -13,7 +13,7 @@ export function NavLink({ href, label, className, onClick }: { href: string; lab
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "relative py-1 text-ink transition-colors hover:text-laurel",
+        "relative whitespace-nowrap py-1 text-ink transition-colors hover:text-laurel",
         "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left rtl:after:origin-right after:scale-x-0 after:bg-laurel after:transition-transform after:duration-300",
         active && "after:scale-x-100",
         className,

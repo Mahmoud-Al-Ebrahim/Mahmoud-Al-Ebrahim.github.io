@@ -67,7 +67,7 @@ export function MobileMenu({ locale, items, labels, location }: { locale: Locale
   }, [open, close]);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         ref={triggerRef}
         type="button"
