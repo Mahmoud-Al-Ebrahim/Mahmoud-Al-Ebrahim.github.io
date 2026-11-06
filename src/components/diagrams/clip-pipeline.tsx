@@ -16,9 +16,11 @@ const NODES: DiagramNode[] = [
   { id: "isolate", label: "Worker isolate", detail: "Owns both interpreters. A message protocol (init, embed job, embed result) keeps inference off the UI thread." },
 ];
 
-export function ClipPipelineDiagram({ compact = false }: DiagramProps) {
+export function ClipPipelineDiagram({ compact = false, locale = "en" }: DiagramProps) {
   return (
     <DiagramFrame
+      diagramId="clip-pipeline"
+      locale={locale}
       title="CLIP on the phone"
       description="Gallery AI's offline semantic search: images and text are encoded into one vector space and ranked by cosine similarity, with nothing leaving the device."
       nodes={NODES}

@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { AppIcon } from "@/components/ui/app-icon";
+import { localName, SecondaryName } from "@/components/ui/arabic-name";
 import { StoreBadges } from "@/components/ui/store-badges";
-import { DOMAIN_LABELS, ROLE_LABELS, type Domain, type Product, type ProductFamily } from "@/content/schema";
+import type { Domain, Product, ProductFamily } from "@/content/schema";
+import { localeHref, type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { storeUrls } from "@/lib/stores";
 import { DomainFilter } from "./domain-filter";
 
@@ -9,37 +12,44 @@ import { DomainFilter } from "./domain-filter";
  * Every published app, rendered on the server so the full list is in the HTML.
  * The domain filter only hides rows in the browser.
  */
-export function AppsCollection({ products, families }: { products: Product[]; families: ProductFamily[] }) {
+export function AppsCollection({ products, families, locale = "en" }: { products: Product[]; families: ProductFamily[]; locale?: Locale }) {
+  const t = getDictionary(locale);
   const domains = Array.from(new Set(products.map((p) => p.domain))) as Domain[];
-  const familyName = (slug?: string) => families.find((f) => f.slug === slug);
+  const familyOf = (slug?: string) => families.find((f) => f.slug === slug);
+  const labeeny = products.find((p) => p.slug === "labeeny");
   return (
     <div>
-      <DomainFilter domains={domains.map((d) => ({ id: d, label: DOMAIN_LABELS[d] }))} listId="apps-list" />
+      <DomainFilter
+        domains={domains.map((d) => ({ id: d, label: t.domains[d] }))}
+        listId="apps-list"
+        labels={{ aria: t.appsPage.filterAria, all: t.appsPage.all }}
+      />
       <ul id="apps-list" data-testid="apps-list" className="mt-8 border-t border-rule">
         {products.map((p) => {
-          const fam = familyName(p.family);
-          const partOf = p.slug === "captain-labeeny" ? { href: "/apps/labeeny", name: "Labeeny" } : fam ? { href: `/apps/${fam.slug}`, name: fam.name } : undefined;
+          const fam = familyOf(p.family);
+          const partOf =
+            p.slug === "captain-labeeny" && labeeny
+              ? { href: localeHref(locale, "/apps/labeeny"), name: localName(labeeny, locale) }
+              : fam
+                ? { href: localeHref(locale, `/apps/${fam.slug}`), name: localName(fam, locale) }
+                : undefined;
           return (
             <li key={p.slug} data-domain={p.domain} className="grid grid-cols-[64px_1fr] gap-x-5 gap-y-4 border-b border-rule py-7 lg:grid-cols-[64px_minmax(0,1.4fr)_minmax(0,1fr)_auto] lg:items-center lg:gap-8">
               <AppIcon slug={p.slug} src={p.icon} size={64} />
               <div className="min-w-0">
                 <h2 className="text-step-2">
-                  <Link href={`/apps/${p.slug}`} className="hover:text-laurel">
-                    {p.name}
+                  <Link href={localeHref(locale, `/apps/${p.slug}`)} className="hover:text-laurel">
+                    {localName(p, locale)}
                   </Link>
-                  {p.nameAr ? (
-                    <span lang="ar" dir="rtl" className="ml-3 font-arabic text-step-1 font-[400] text-muted">
-                      {p.nameAr}
-                    </span>
-                  ) : null}
+                  <SecondaryName name={p.name} nameAr={p.nameAr} locale={locale} className="ms-3 text-step-1 font-[400] text-muted" />
                 </h2>
                 <p className="mt-1 max-w-[52ch]">{p.tagline}</p>
                 <p className="mt-2 text-step--1 text-muted">
-                  {DOMAIN_LABELS[p.domain]}. {p.roleLabel ?? ROLE_LABELS[p.role]} for {p.publisher}.
+                  {t.domains[p.domain]}. {t.roleFor(p.roleLabel ?? t.roles[p.role], p.publisher)}.
                   {partOf ? (
                     <>
                       {" "}
-                      Part of{" "}
+                      {t.appsPage.partOf}{" "}
                       <Link href={partOf.href} className="link">
                         {partOf.name}
                       </Link>
@@ -55,7 +65,7 @@ export function AppsCollection({ products, families }: { products: Product[]; fa
                 ))}
               </div>
               <div className="col-span-2 lg:col-span-1">
-                <StoreBadges name={p.name} size="sm" {...storeUrls(p.stores)} />
+                <StoreBadges name={localName(p, locale)} locale={locale} size="sm" {...storeUrls(p.stores)} />
               </div>
             </li>
           );

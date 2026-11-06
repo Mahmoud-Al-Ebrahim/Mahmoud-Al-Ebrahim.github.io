@@ -162,7 +162,7 @@
 @layer components {
   .skip-link {
     position: absolute;
-    left: var(--gutter);
+    inset-inline-start: var(--gutter);
     top: -100%;
     z-index: 100;
     padding: 0.5rem 0.75rem;
@@ -254,14 +254,14 @@
   .prose-journal pre code { background: none; padding: 0; color: inherit; }
   .prose-journal a { color: var(--laurel); text-decoration: underline; }
   .prose-journal blockquote {
-    border-left: 2px solid var(--laurel);
-    padding-left: 1rem;
+    border-inline-start: 2px solid var(--laurel);
+    padding-inline-start: 1rem;
     color: var(--muted);
     margin: 1.25em 0;
   }
   .prose-journal table { width: 100%; border-collapse: collapse; margin: 1.25em 0; font-size: var(--step--1); }
   .prose-journal th,
-  .prose-journal td { border-bottom: 1px solid var(--rule); padding: 0.5rem 0.5rem 0.5rem 0; text-align: left; vertical-align: top; }
+  .prose-journal td { border-bottom: 1px solid var(--rule); padding-block: 0.5rem; padding-inline: 0 0.5rem; text-align: start; vertical-align: top; }
   .prose-journal th { font-weight: 500; color: var(--muted); }
 }
 
@@ -362,4 +362,32 @@
   ::view-transition-new(*) {
     animation: none !important;
   }
+}
+
+/* ------------------------------------------------------------------
+   Arabic pages. Unlayered on purpose, so they win over utilities:
+   Arabic script must not be tracked tighter, needs taller lines than
+   Latin display type, and reads better a touch heavier at body size.
+   Code stays left to right.
+------------------------------------------------------------------- */
+html:lang(ar) body {
+  font-family: var(--font-arabic);
+  font-weight: 380;
+  line-height: 1.8;
+}
+html:lang(ar) :is(h1, h2, h3, h4, .tracking-tight):not([lang="en"]) {
+  letter-spacing: 0;
+}
+html:lang(ar) :is(h1, h2, h3, h4):not([lang="en"]) {
+  line-height: 1.35;
+}
+html:lang(ar) :is(pre, code, kbd, samp) {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+html:lang(ar) .prose-journal pre {
+  text-align: left;
+}
+[lang="en"] {
+  font-family: var(--font-sans);
 }

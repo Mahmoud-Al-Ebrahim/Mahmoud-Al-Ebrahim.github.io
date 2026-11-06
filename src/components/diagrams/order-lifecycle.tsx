@@ -15,10 +15,12 @@ const NODES: DiagramNode[] = [
   { id: "fcm", label: "Push notifications", detail: "FCM carries every cross-role event with a background handler and a local-notification bridge in all four apps. There is no socket server." },
 ];
 
-export function OrderLifecycleDiagram({ compact = false }: DiagramProps) {
+export function OrderLifecycleDiagram({ compact = false, locale = "en" }: DiagramProps) {
   const y = { customer: 50, restaurant: 130, driver: 210, admin: 290 };
   return (
     <DiagramFrame
+      diagramId="order-lifecycle"
+      locale={locale}
       title="One order, four apps"
       description="The Foodly order state machine as each role sees it. States are owned by the role that sets them; the admin app reads all of them."
       nodes={NODES}

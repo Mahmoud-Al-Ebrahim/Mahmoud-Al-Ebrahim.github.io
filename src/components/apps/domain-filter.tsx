@@ -8,7 +8,15 @@ import { cn } from "@/lib/cn";
  * URLs (`/apps?domain=education`), so a shared link opens filtered; without
  * JavaScript every row stays visible.
  */
-export function DomainFilter({ domains, listId }: { domains: { id: string; label: string }[]; listId: string }) {
+export function DomainFilter({
+  domains,
+  listId,
+  labels = { aria: "Filter by domain", all: "All" },
+}: {
+  domains: { id: string; label: string }[];
+  listId: string;
+  labels?: { aria: string; all: string };
+}) {
   const [active, setActive] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,9 +51,9 @@ export function DomainFilter({ domains, listId }: { domains: { id: string; label
     );
 
   return (
-    <nav aria-label="Filter by domain" className="flex flex-wrap gap-2">
+    <nav aria-label={labels.aria} className="flex flex-wrap gap-2">
       <a href="?" onClick={(e) => choose(e, null)} aria-current={active === null ? "true" : undefined} className={chip(active === null)}>
-        All
+        {labels.all}
       </a>
       {domains.map((d) => (
         <a

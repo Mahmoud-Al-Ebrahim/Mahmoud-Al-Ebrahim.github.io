@@ -18,6 +18,19 @@ const routes = [
   "/resume",
   "/contact",
   "/nope-404",
+  // Arabic, right to left.
+  "/ar",
+  "/ar/apps",
+  "/ar/apps/labeeny",
+  "/ar/apps/fahim-edtech",
+  "/ar/projects",
+  "/ar/projects/gallery-ai",
+  "/ar/projects/foodly",
+  "/ar/about",
+  "/ar/writing",
+  "/ar/writing/generic-network-repository",
+  "/ar/resume",
+  "/ar/contact",
 ];
 
 for (const route of routes) {

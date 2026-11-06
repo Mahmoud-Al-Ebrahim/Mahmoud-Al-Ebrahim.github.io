@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { KIND_LABELS } from "@/components/projects/project-case-study";
 import type { Project } from "@/content/schema";
+import { localeHref, type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 
-export function ProjectsCollection({ projects }: { projects: Project[] }) {
+export function ProjectsCollection({ projects, locale = "en" }: { projects: Project[]; locale?: Locale }) {
+  const t = getDictionary(locale);
   return (
     <ol data-testid="projects-list" className="border-t border-rule">
       {projects.map((p, i) => (
@@ -10,10 +12,12 @@ export function ProjectsCollection({ projects }: { projects: Project[] }) {
           <p className="text-step--1 tabular-nums text-muted md:col-span-1">{String(i + 1).padStart(2, "0")}</p>
           <div className="md:col-span-7">
             <p className="text-step--1 text-muted">
-              {KIND_LABELS[p.kind]}, {p.year}
+              {t.kinds[p.kind]}
+              {locale === "ar" ? "، " : ", "}
+              {p.year}
             </p>
             <h2 className="mt-1 text-step-3">
-              <Link href={`/projects/${p.slug}`} className="group-hover:text-laurel">
+              <Link href={localeHref(locale, `/projects/${p.slug}`)} className="group-hover:text-laurel">
                 {p.name}
               </Link>
             </h2>

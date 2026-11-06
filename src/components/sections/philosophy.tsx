@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { principles } from "@/content/philosophy";
+import type { Locale } from "@/i18n/config";
+import { getPrinciples } from "@/lib/content";
 
-export function Philosophy() {
+export function Philosophy({ locale = "en" }: { locale?: Locale }) {
+  const principles = getPrinciples(locale);
   return (
     <ol className="grid gap-x-10 gap-y-8 md:grid-cols-2">
       {principles.map((p) => (

@@ -8,7 +8,7 @@ export function ProgressHairline() {
     <div
       aria-hidden
       data-progress-hairline=""
-      className="progress-hairline pointer-events-none fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-laurel"
+      className="progress-hairline pointer-events-none fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-laurel rtl:origin-right"
     />
   );
 }

@@ -1,13 +1,27 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Container } from "@/components/ui/container";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { MarginColumn, type MarginItem } from "./margin-column";
 import { PrevNext, type PrevNextLink } from "./prev-next";
 
 /** Breadcrumb back to a collection. */
-export function Crumb({ href, label, current, className }: { href: string; label: string; current: string; className?: string }) {
+export function Crumb({
+  href,
+  label,
+  current,
+  className,
+  locale = "en",
+}: {
+  href: string;
+  label: string;
+  current: string;
+  className?: string;
+  locale?: Locale;
+}) {
   return (
-    <nav aria-label="Breadcrumb" className={className}>
+    <nav aria-label={getDictionary(locale).caseStudy.breadcrumb} className={className}>
       <ol className="flex flex-wrap gap-x-2 text-step--1" style={{ color: "var(--muted)" }}>
         <li>
           <Link href={href} className="underline decoration-1 underline-offset-4 hover:decoration-2">
@@ -31,21 +45,24 @@ export function CaseStudyBody({
   prev,
   next,
   after,
+  locale = "en",
 }: {
+  locale?: Locale;
   margin: MarginItem[];
   children: ReactNode;
   prev?: PrevNextLink;
   next?: PrevNextLink;
   after?: ReactNode;
 }) {
+  const t = getDictionary(locale).caseStudy;
   return (
     <Container width="wide" className="py-14 md:py-20">
       <div className="grid gap-10 md:grid-cols-12 md:gap-8">
-        <MarginColumn items={margin} />
+        <MarginColumn items={margin} label={t.facts} />
         <div className="min-w-0 md:col-span-8 md:col-start-5">{children}</div>
       </div>
       {after}
-      <PrevNext prev={prev} next={next} />
+      <PrevNext prev={prev} next={next} labels={t} />
     </Container>
   );
 }

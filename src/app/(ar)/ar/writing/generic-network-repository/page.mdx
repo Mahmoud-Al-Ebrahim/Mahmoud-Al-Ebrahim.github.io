@@ -1,0 +1,106 @@
+import { ArticleLayout } from "@/components/writing/article-layout";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: "دالة مستودع واحدة بدلًا من أربع عشرة",
+  description:
+    "غلاف استدعاء عام يعيد Either: يتحقق من الاتصال، ويستدعي المصدر البعيد، ويعود إلى التخزين المؤقت عند الحاجة، ويحوّل الأخطاء إلى إخفاقات، فتتقلّص مستودعات الميزات إلى سطر واحد لكل دالة.",
+  path: "/ar/writing/generic-network-repository",
+  locale: "ar",
+});
+
+<ArticleLayout slug="generic-network-repository" locale="ar">
+
+كثيرًا ما تُسوَّق المعمارية النظيفة (Clean Architecture) في Flutter بمخطط، وتُسلَّم بكود متكرر (boilerplate). وطبقة المستودع (repository) هي حيث يشتد الألم: كل دالة تتحقق من الشبكة، وتستدعي مصدر بيانات، وتلتقط الاستثناءات، وتحوّلها إلى إخفاقات (failures)، وربما تكتب في التخزين المؤقت. وبحلول الميزة الثالثة تجد نفسك تنسخ عشرين سطرًا لتغيّر سطرًا واحدًا. في Safeer، وهو تطبيق توصيل بطرفين يضم أربعة عشر مستودعًا، توقفت عن النسخ.
+
+## شكل المشكلة
+
+هكذا كانت تبدو دالة مستودع نموذجية قبل التغيير:
+
+```dart
+@override
+Future<Either<Failure, List<Order>>> getOrders() async {
+  if (!await networkInfo.isConnected) {
+    return Left(OfflineFailure());
+  }
+  try {
+    final result = await remote.getOrders();
+    return Right(result);
+  } on ServerException catch (e) {
+    return Left(ServerFailure(e.message));
+  } on DioException catch (e) {
+    return Left(DioFailure(e));
+  }
+}
+```
+
+اضرب ذلك في كل دالة من كل مستودع. ما يختلف بينها هو الاستدعاء البعيد، وأحيانًا قراءة من التخزين المؤقت أو كتابة فيه. كل ما عدا ذلك متطابق، والأسوأ أنه معرَّض للانحراف بالقدر نفسه: دالة تنسى فحص الاتصال، وأخرى تحوّل نوع استثناء جديدًا، وثالثة تسجّل في السجل (log) بينما لا تفعل البقية.
+
+## استدعاء عام واحد
+
+البديل دالة واحدة في صنف أساسي (base class) صغير، تتلقى ما يتغيّر فعلًا على هيئة معاملات:
+
+```dart
+Future<Either<Failure, T>> call<T>({
+  required Future<T> Function() remote,
+  Future<T> Function()? local,
+  Future<void> Function(T data)? cache,
+}) async {
+  if (await networkInfo.isConnected) {
+    try {
+      final data = await remote();
+      if (cache != null) await cache(data);
+      return Right(data);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on DioException catch (e) {
+      return Left(DioFailure(e));
+    }
+  }
+  if (local != null) {
+    try {
+      return Right(await local());
+    } on EmptyCacheException {
+      return Left(EmptyCacheFailure());
+    }
+  }
+  return Left(OfflineFailure());
+}
+```
+
+ويصبح مستودع الميزة قائمة من التفويضات:
+
+```dart
+@override
+Future<Either<Failure, List<Order>>> getOrders() =>
+    call(remote: remoteSource.getOrders);
+
+@override
+Future<Either<Failure, Cart>> getCart() => call(
+      remote: remoteSource.getCart,
+      local: localSource.getCart,
+      cache: localSource.saveCart,
+    );
+```
+
+صارت قاعدة الاتصال، وتحويل الإخفاقات، وترتيب "الكتابة في التخزين المؤقت ثم الرجوع إليه" موجودة الآن في مكان واحد بالضبط، ولذلك المكان اختبار.
+
+## لماذا دالة وليس صنفًا أساسيًا بدوال يُعاد تعريفها
+
+كانت المسودة الأولى صنفًا أساسيًا على نمط template method: تُعيد الأصناف الفرعية تعريف `fetchRemote` و`fetchLocal`. أزال ذلك التكرار، لكنه أخفى أيّ مستودع يفعل ماذا، واحتاج المستودع ذو الدالتين إلى صنفين فرعيين. أما تمرير دوال الجلب على هيئة معاملات فيُبقي كل دالة مقروءة في موضع استدعائها، ويسمح لأي دالة غير اعتيادية بتجاوز الغلاف كليًا. انتصر التركيب (composition) على الوراثة (inheritance) للأسباب المعتادة؛ كل ما في الأمر أن رؤية ذلك تطلّبت مسودة خاطئة واحدة.
+
+## ما الذي تحصل عليه الواجهة
+
+لأن كل مستودع يعيد النوع نفسه `Either<Failure, T>`، تستطيع طبقة العرض أن توحّد سلوكها هي الأخرى. يحمل الغلاف `BlocStateData<T>` حالات البداية والتحميل والنجاح والفشل، مع السماح بوجود البيانات أثناء التحميل كي لا يُفرغ التحديث الشاشة، وتعرض أداة بناء (builder widget) حالتي التحميل والفشل الافتراضيتين ما لم تتجاوزهما الشاشة. ثمانية عشر Bloc تتشارك هذا العقد الواحد.
+
+## الحدود
+
+يفترض الغلاف مصدرًا بعيدًا واحدًا لكل استدعاء، وتخزينًا مؤقتًا يحفظ النتيجة كاملة. أما التحديثات الجزئية، ودمج الصفحات (pagination)، وحل التعارضات، فما زالت تحتاج إلى دوال مكتوبة يدويًا، ولا بأس في ذلك: يتولى الغلاف التسعين بالمئة كي تحظى العشرة بالمئة الباقية بالاهتمام. وقد حمل الغلاف نفسه، بالشكل نفسه، مستودعات من بيتي (Min Bayty) لاحقًا.
+
+## ما الذي سأفعله بشكل مختلف
+
+أن أضيف خطافات التخزين المؤقت فقط حين تحتاجها أول ميزة. شُحن الإصدار الأول مع المعاملين `local` و`cache` ولم تستخدمهما أي ميزة لأشهر؛ تبيّن في النهاية أنهما في محلهما، لكنهما كانا تخمينًا في حينه.
+
+المصدر: Safeer و من بيتي (Min Bayty)، ProoTech، 2025.
+
+</ArticleLayout>

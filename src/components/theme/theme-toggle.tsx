@@ -27,7 +27,13 @@ function subscribe(onChange: () => void): () => void {
   };
 }
 
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle({
+  className,
+  labels = { toLight: "Switch to light theme", toDark: "Switch to dark theme" },
+}: {
+  className?: string;
+  labels?: { toLight: string; toDark: string };
+}) {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   function toggle() {
@@ -41,7 +47,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   }
 
   const isDark = theme === "dark";
-  const label = isDark ? "Switch to light theme" : "Switch to dark theme";
+  const label = isDark ? labels.toLight : labels.toDark;
 
   return (
     <button

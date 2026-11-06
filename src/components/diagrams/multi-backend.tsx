@@ -16,9 +16,11 @@ const NODES: DiagramNode[] = [
   { id: "log", label: "Logging interceptor", detail: "Records request timings into Firebase Analytics and keeps a local request log for support." },
 ];
 
-export function MultiBackendDiagram({ compact = false }: DiagramProps) {
+export function MultiBackendDiagram({ compact = false, locale = "en" }: DiagramProps) {
   return (
     <DiagramFrame
+      diagramId="multi-backend"
+      locale={locale}
       title="One HTTP stack, four services"
       description="How Trydos talks to its market, chat, stories and search backends with distinct tokens through a single generic client."
       nodes={NODES}

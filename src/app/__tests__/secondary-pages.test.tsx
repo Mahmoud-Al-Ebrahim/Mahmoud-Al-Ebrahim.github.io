@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import AboutPage from "@/app/about/page";
-import WritingPage from "@/app/writing/page";
-import ResumePage from "@/app/resume/page";
-import ContactPage from "@/app/contact/page";
-import NotFound from "@/app/not-found";
+import AboutPage from "@/app/(en)/about/page";
+import WritingPage from "@/app/(en)/writing/page";
+import ResumePage from "@/app/(en)/resume/page";
+import ContactPage from "@/app/(en)/contact/page";
+import { NotFoundBlock } from "@/views/not-found";
 import { getArticles } from "@/lib/content";
 
 describe("/about", () => {
@@ -44,7 +44,7 @@ describe("/contact", () => {
 
 describe("not-found", () => {
   it("links to the apps and projects collections", () => {
-    render(<NotFound />);
+    render(<NotFoundBlock locale="en" />);
     expect(screen.getByRole("link", { name: /published applications/i })).toHaveAttribute("href", "/apps");
     expect(screen.getByRole("link", { name: /engineering projects/i })).toHaveAttribute("href", "/projects");
   });

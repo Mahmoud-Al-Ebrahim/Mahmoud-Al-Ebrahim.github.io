@@ -22,24 +22,38 @@ else
   FRESH=0
 fi
 
-git -C "${ROOT}" archive --format=tar HEAD | tar -x -C "${WORK}"
-cd "${WORK}"
-git init -q -b main
-git add -A
-git -c user.name="${USER_NAME}" -c user.email="${USER_NAME}@users.noreply.github.com" commit -q -m "Publish portfolio"
-git remote add origin "https://github.com/${REPO}.git"
+MESSAGE="${1:-Publish portfolio}"
+AUTHOR=(-c user.name="${USER_NAME}" -c user.email="${USER_NAME}@users.noreply.github.com")
 
 if [ "${FRESH}" = "1" ]; then
+  git -C "${ROOT}" archive --format=tar HEAD | tar -x -C "${WORK}"
+  cd "${WORK}"
+  git init -q -b main
+  git add -A
+  git "${AUTHOR[@]}" commit -q -m "${MESSAGE}"
+  git remote add origin "https://github.com/${REPO}.git"
   git push -u origin main
 else
-  # Never overwrite an existing repository's history.
-  git fetch -q origin main || true
-  if git rev-parse -q --verify origin/main >/dev/null; then
-    echo "The repository already has commits. Push this folder manually or pick another repository." >&2
-    echo "Prepared copy: ${WORK}" >&2
-    exit 1
+  # Update: one new commit on top of the published history (never a force
+  # push). The tree is replaced by the archived HEAD, so files deleted
+  # locally are deleted there too, and export-ignored paths never arrive.
+  git clone -q "https://github.com/${REPO}.git" "${WORK}"
+  cd "${WORK}"
+  git rm -q -r --ignore-unmatch . >/dev/null
+  git -C "${ROOT}" archive --format=tar HEAD | tar -x -C "${WORK}"
+  for private in docs/discovery docs/superpowers .superpowers; do
+    if [ -e "${private}" ]; then
+      echo "Refusing to publish: ${private} is present." >&2
+      exit 1
+    fi
+  done
+  git add -A
+  if git diff --cached --quiet; then
+    echo "Nothing to publish: the repository already matches HEAD."
+    exit 0
   fi
-  git push -u origin main
+  git "${AUTHOR[@]}" commit -q -m "${MESSAGE}"
+  git push origin main
 fi
 
 # Deploy Pages from the workflow in .github/workflows/deploy.yml

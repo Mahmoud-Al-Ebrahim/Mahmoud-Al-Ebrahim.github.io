@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { Reveal } from "@/components/motion/reveal";
 import { PhoneFrame } from "@/components/ui/phone-frame";
+import { localName } from "@/components/ui/arabic-name";
 import type { Product } from "@/content/schema";
+import { localeHref, type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { Panel, PanelText, panelColors } from "./panel";
 
 /** Two apps of one platform, side by side: customer and captain. */
-export function LabeenyPanel({ product, captain }: { product: Product; captain?: Product }) {
+export function LabeenyPanel({ product, captain, locale = "en" }: { product: Product; captain?: Product; locale?: Locale }) {
   const c = panelColors(product.brandColor);
+  const t = getDictionary(locale).shipped;
   return (
     <Panel brand={product.brandColor} labelledBy="show-labeeny" className="pt-16 md:pt-24">
       <div data-testid="composition-labeeny" className="grid items-center gap-12 md:grid-cols-12 md:gap-8">
@@ -23,14 +27,15 @@ export function LabeenyPanel({ product, captain }: { product: Product; captain?:
             publisher={product.publisher}
             stores={product.stores}
             brand={product.brandColor}
-            href={`/apps/${product.slug}`}
+            href={localeHref(locale, `/apps/${product.slug}`)}
             headingId="show-labeeny"
+            locale={locale}
             extra={
               captain ? (
                 <p className="mt-5 text-step--1" style={{ color: c.muted }}>
-                  The captain app ships separately:{" "}
-                  <Link href={`/apps/${captain.slug}`} className="underline" style={{ color: c.fg }}>
-                    {captain.name}
+                  {t.captainSeparately}{" "}
+                  <Link href={localeHref(locale, `/apps/${captain.slug}`)} className="underline" style={{ color: c.fg }}>
+                    {localName(captain, locale)}
                   </Link>
                   .
                 </p>
@@ -42,7 +47,7 @@ export function LabeenyPanel({ product, captain }: { product: Product; captain?:
           <div className="flex items-end justify-center gap-[5%] md:justify-start">
             <PhoneFrame
               src={product.screenshots[1] ?? product.screenshots[0]}
-              alt={`${product.name} customer app: choose pickup and drop-off`}
+              alt={t.customerAlt(localName(product, locale))}
               flat={product.screenshotStyle === "flat"}
               width={330}
               className="drift w-[46%]"
@@ -51,7 +56,7 @@ export function LabeenyPanel({ product, captain }: { product: Product; captain?:
             {captain ? (
               <PhoneFrame
                 src={captain.screenshots[0]}
-                alt={`${captain.name} captain app: profile and orders`}
+                alt={t.captainAlt(localName(captain, locale))}
                 flat={captain.screenshotStyle === "flat"}
                 width={330}
                 className="drift w-[46%]"

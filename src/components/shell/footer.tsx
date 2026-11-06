@@ -1,18 +1,19 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/content/site";
-import { NAV } from "./nav-links";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
+import { navItems } from "./nav-links";
 
-export function Footer() {
+export function Footer({ locale = "en" }: { locale?: Locale }) {
+  const t = getDictionary(locale);
   return (
     <footer className="night border-t border-rule">
       <Container width="wide" className="flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
-        <p className="text-step--1 text-muted">
-          {siteConfig.name}, senior Flutter engineer. Static site, no analytics, no cookies.
-        </p>
-        <nav aria-label="Footer">
+        <p className="text-step--1 text-muted">{t.footer(siteConfig.name)}</p>
+        <nav aria-label={t.navAria.footer}>
           <ul className="flex flex-wrap gap-x-6 gap-y-2 text-step--1">
-            {NAV.map((item) => (
+            {navItems(locale).map((item) => (
               <li key={item.href}>
                 <Link href={item.href} className="hover:underline">
                   {item.label}

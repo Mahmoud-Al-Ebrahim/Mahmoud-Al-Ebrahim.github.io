@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { tradeOffs } from "@/content/philosophy";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
+import { getTradeOffs } from "@/lib/content";
 
 /** Three worked decisions: situation, options, choice, outcome. */
-export function TradeOffs() {
+export function TradeOffs({ locale = "en" }: { locale?: Locale }) {
+  const tradeOffs = getTradeOffs(locale);
+  const labels = getDictionary(locale).tradeOffs;
   return (
     <ol className="divide-y divide-rule border-y border-rule">
       {tradeOffs.map((t, i) => (
@@ -17,21 +21,21 @@ export function TradeOffs() {
           </div>
           <dl className="space-y-5 md:col-span-8">
             <div>
-              <dt className="text-step--1 text-muted">Options considered</dt>
+              <dt className="text-step--1 text-muted">{labels.options}</dt>
               <dd>
-                <ol className="mt-2 list-decimal space-y-2 pl-5">
+                <ol className="mt-2 list-decimal space-y-2 ps-5">
                   {t.options.map((o) => (
                     <li key={o}>{o}</li>
                   ))}
                 </ol>
               </dd>
             </div>
-            <div className="border-l-2 border-laurel pl-4">
-              <dt className="text-step--1 text-laurel">Choice</dt>
+            <div className="border-s-2 border-laurel ps-4">
+              <dt className="text-step--1 text-laurel">{labels.choice}</dt>
               <dd className="mt-1">{t.choice}</dd>
             </div>
             <div>
-              <dt className="text-step--1 text-muted">Outcome</dt>
+              <dt className="text-step--1 text-muted">{labels.outcome}</dt>
               <dd className="mt-1 text-muted">{t.outcome}</dd>
             </div>
           </dl>

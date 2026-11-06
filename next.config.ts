@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
   output: "export",
   basePath: basePath || undefined,
   trailingSlash: false,
+  experimental: {
+    // Two root layouts (English at /, Arabic at /ar): unknown URLs get one bilingual 404.
+    globalNotFound: true,
+  },
   pageExtensions: ["ts", "tsx", "md", "mdx"],
   images: {
     // Images are pre-sized WebP files; there is no image server on a static host.

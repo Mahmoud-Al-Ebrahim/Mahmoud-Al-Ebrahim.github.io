@@ -1,4 +1,6 @@
 import { IconApple, IconPlay } from "@/components/icons";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { cn } from "@/lib/cn";
 
 type Size = "sm" | "md";
@@ -11,9 +13,11 @@ function Badge({
   icon,
   size,
   inverse,
+  forName,
 }: {
   href: string;
   name: string;
+  forName: (name: string) => string;
   eyebrow: string;
   title: string;
   icon: React.ReactNode;
@@ -36,7 +40,7 @@ function Badge({
         <span className={cn("opacity-80", size === "sm" ? "text-[10px]" : "text-[11px]")}>{eyebrow} </span>
         <span className={cn("font-medium", size === "sm" ? "text-[13px]" : "text-[15px]")}>{title}</span>
       </span>
-      <span className="sr-only"> for {name}</span>
+      <span className="sr-only">{forName(name)}</span>
     </a>
   );
 }
@@ -49,8 +53,10 @@ export function StoreBadges({
   size = "md",
   inverse = false,
   className,
+  locale = "en",
 }: {
   name: string;
+  locale?: Locale;
   play?: { url: string };
   appStore?: { url: string };
   size?: Size;
@@ -58,13 +64,14 @@ export function StoreBadges({
   inverse?: boolean;
   className?: string;
 }) {
+  const t = getDictionary(locale).stores;
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       {appStore ? (
-        <Badge href={appStore.url} name={name} eyebrow="Download on the" title="App Store" icon={<IconApple />} size={size} inverse={inverse} />
+        <Badge href={appStore.url} name={name} eyebrow={t.appStoreEyebrow} title="App Store" icon={<IconApple />} size={size} inverse={inverse} forName={t.forName} />
       ) : null}
       {play ? (
-        <Badge href={play.url} name={name} eyebrow="Get it on" title="Google Play" icon={<IconPlay />} size={size} inverse={inverse} />
+        <Badge href={play.url} name={name} eyebrow={t.playEyebrow} title="Google Play" icon={<IconPlay />} size={size} inverse={inverse} forName={t.forName} />
       ) : null}
     </div>
   );

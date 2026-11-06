@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { PhoneFrame } from "@/components/ui/phone-frame";
 import { StoreBadges } from "@/components/ui/store-badges";
-import { ArabicName } from "@/components/ui/arabic-name";
+import { ArabicName, localName } from "@/components/ui/arabic-name";
+import { localeHref, type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { cn } from "@/lib/cn";
 
 export type StoryChapter = {
@@ -33,7 +35,9 @@ export function EdTechStory({
   familyHighlights,
   familyHref,
   chapters,
+  locale = "en",
 }: {
+  locale?: Locale;
   familyName: string;
   familyNameAr?: string;
   familyTagline: string;
@@ -41,6 +45,7 @@ export function EdTechStory({
   familyHref: string;
   chapters: StoryChapter[];
 }) {
+  const t = getDictionary(locale);
   const [active, setActive] = useState(0);
   const refs = useRef<(HTMLElement | null)[]>([]);
 
@@ -78,7 +83,7 @@ export function EdTechStory({
                   className="absolute inset-0 transition-[opacity,transform] duration-700"
                   style={{ opacity: i === active ? 1 : 0, transform: i === active ? "none" : "translateY(24px) scale(0.97)" }}
                 >
-                  <PhoneFrame src={ch.screen} alt={i === active ? `${ch.name} screen` : ""} width={280} />
+                  <PhoneFrame src={ch.screen} alt={i === active ? t.screen(localName(ch, locale)) : ""} width={280} />
                 </div>
               ))}
             </div>
@@ -88,11 +93,11 @@ export function EdTechStory({
         <div className="md:col-span-6 md:col-start-7">
           <header className="flex min-h-[60svh] flex-col justify-center py-20">
             <p className="text-step--1" style={{ color: c.muted }}>
-              Four apps, one platform
+              {t.shipped.familyKicker}
             </p>
-            <ArabicName as="h3" id="show-fahim-edtech" size="display" latin={familyName} arabic={familyNameAr} className="mt-3" />
+            <ArabicName as="h3" id="show-fahim-edtech" size="display" latin={familyName} arabic={familyNameAr} locale={locale} className="mt-3" />
             <p className="mt-4 max-w-[34ch] text-step-2 font-[400]">{familyTagline}</p>
-            <ul className="mt-8 max-w-[48ch] space-y-3 border-t pt-5" style={{ borderColor: c.dark ? "rgba(255,255,255,0.25)" : "rgba(18,19,20,0.18)" }} aria-label="What I engineered">
+            <ul className="mt-8 max-w-[48ch] space-y-3 border-t pt-5" style={{ borderColor: c.dark ? "rgba(255,255,255,0.25)" : "rgba(18,19,20,0.18)" }} aria-label={t.whatIEngineered}>
               {familyHighlights.map((h) => (
                 <li key={h} className="grid grid-cols-[1rem_1fr] gap-2">
                   <span aria-hidden className="mt-[0.7em] h-px w-3 bg-current" />
@@ -100,12 +105,12 @@ export function EdTechStory({
                 </li>
               ))}
             </ul>
-            <Link href={familyHref} className="mt-8 font-medium underline decoration-1 underline-offset-4 hover:decoration-2">
-              Read the platform case study
+            <Link href={localeHref(locale, familyHref)} className="mt-8 font-medium underline decoration-1 underline-offset-4 hover:decoration-2">
+              {t.shipped.readPlatform}
             </Link>
           </header>
 
-          <ol aria-label="Apps in this family">
+          <ol aria-label={t.shipped.appsInFamily}>
             {chapters.map((ch, i) => (
               <li
                 key={ch.slug}
@@ -120,11 +125,11 @@ export function EdTechStory({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={ch.icon} alt="" width={52} height={52} className="h-[52px] w-[52px] rounded-[22%] ring-1 ring-black/10" loading="lazy" />
                   <p className="text-step--1 tabular-nums" style={{ color: c.muted }}>
-                    {String(i + 1).padStart(2, "0")} of {String(chapters.length).padStart(2, "0")}
+                    {t.shipped.ofCount(String(i + 1).padStart(2, "0"), String(chapters.length).padStart(2, "0"))}
                   </p>
                 </div>
                 <h4 className="mt-5 text-step-4">
-                  <ArabicName latin={ch.name} arabic={ch.nameAr} />
+                  <ArabicName latin={ch.name} arabic={ch.nameAr} locale={locale} />
                 </h4>
                 <p className="mt-3 max-w-[36ch] text-step-1">{ch.tagline}</p>
                 <p className="mt-3 text-step--1" style={{ color: c.muted }}>
@@ -139,12 +144,12 @@ export function EdTechStory({
                   ))}
                 </ul>
                 <div className="mt-6 md:hidden">
-                  <PhoneFrame src={ch.screen} alt={`${ch.name} screen`} width={220} className="w-[62%]" />
+                  <PhoneFrame src={ch.screen} alt={t.screen(localName(ch, locale))} width={220} className="w-[62%]" />
                 </div>
                 <div className={cn("mt-7 flex flex-wrap items-center gap-x-6 gap-y-4")}>
-                  <StoreBadges name={ch.name} {...ch.stores} size="sm" inverse={c.dark} />
-                  <Link href={`/apps/${ch.slug}`} className="underline decoration-1 underline-offset-4 hover:decoration-2">
-                    {ch.name} details
+                  <StoreBadges name={localName(ch, locale)} locale={locale} {...ch.stores} size="sm" inverse={c.dark} />
+                  <Link href={localeHref(locale, `/apps/${ch.slug}`)} className="underline decoration-1 underline-offset-4 hover:decoration-2">
+                    {t.shipped.details(localName(ch, locale))}
                   </Link>
                 </div>
               </li>

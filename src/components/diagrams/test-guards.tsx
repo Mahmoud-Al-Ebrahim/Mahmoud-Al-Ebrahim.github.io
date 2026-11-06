@@ -15,9 +15,11 @@ const NODES: DiagramNode[] = [
   { id: "signout", label: "Sign-out helper", detail: "clearSessionBlocs: the one place that resets Blocs and the chat singleton when the account changes." },
 ];
 
-export function TestGuardsDiagram({ compact = false }: DiagramProps) {
+export function TestGuardsDiagram({ compact = false, locale = "en" }: DiagramProps) {
   return (
     <DiagramFrame
+      diagramId="test-guards"
+      locale={locale}
       title="Tests that read the source tree"
       description="fashion_store's four architecture-guard tests and the conventions each one enforces at build time."
       nodes={NODES}

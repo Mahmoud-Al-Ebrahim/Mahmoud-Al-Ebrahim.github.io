@@ -99,3 +99,22 @@ test("focused elements show a visible focus ring", async ({ page }) => {
   expect(outline.style).not.toBe("none");
   expect(outline.width).not.toBe("0px");
 });
+
+test("the language switch moves between the English and Arabic versions of the same page", async ({ page, isMobile }) => {
+  await page.goto("/apps/labeeny");
+  if (isMobile) await page.getByRole("button", { name: "Open menu" }).click();
+  await page.getByTestId("language-switch").filter({ visible: true }).first().click();
+  await expect(page).toHaveURL(/\/ar\/apps\/labeeny$/);
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("لبيني");
+  if (isMobile) await page.getByRole("button", { name: "فتح القائمة" }).click();
+  await page.getByTestId("language-switch").filter({ visible: true }).first().click();
+  await expect(page).toHaveURL(/\/apps\/labeeny$/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+});
+
+test("the 404 page answers in both languages", async ({ page }) => {
+  await page.goto("/ar/nope-404");
+  await expect(page.getByText("الصفحة غير موجودة").first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "التطبيقات المنشورة" })).toHaveAttribute("href", "/ar/apps");
+});

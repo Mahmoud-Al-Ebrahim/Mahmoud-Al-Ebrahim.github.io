@@ -48,7 +48,7 @@ export function Section({
           <>
             <div className="grid gap-6 md:grid-cols-12 md:gap-8">
               {header}
-              {aside ? <div className="self-end md:col-span-4 md:text-right">{aside}</div> : null}
+              {aside ? <div className="self-end md:col-span-4 md:text-end">{aside}</div> : null}
             </div>
             <div className="mt-12 md:mt-16">{children}</div>
           </>

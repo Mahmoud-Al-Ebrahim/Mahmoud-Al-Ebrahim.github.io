@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const routes = ["/", "/apps", "/projects", "/projects/foodly", "/apps/sayed", "/apps/labeeny", "/apps/fahim-edtech", "/projects/gallery-ai", "/about", "/writing/clip-on-device-dart", "/resume"];
+const routes = ["/", "/apps", "/projects", "/projects/foodly", "/apps/sayed", "/apps/labeeny", "/apps/fahim-edtech", "/projects/gallery-ai", "/about", "/writing/clip-on-device-dart", "/resume", "/ar", "/ar/apps", "/ar/apps/fahim-edtech", "/ar/projects/gallery-ai", "/ar/about", "/ar/writing/generic-network-repository", "/ar/resume"];
 
 for (const route of routes) {
   test(`${route} has no horizontal scroll on a phone`, async ({ page, isMobile }, testInfo) => {

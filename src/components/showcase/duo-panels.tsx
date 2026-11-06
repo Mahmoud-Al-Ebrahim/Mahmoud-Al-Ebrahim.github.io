@@ -1,10 +1,14 @@
 import { Reveal } from "@/components/motion/reveal";
 import { PhoneFrame } from "@/components/ui/phone-frame";
+import { localName } from "@/components/ui/arabic-name";
 import type { Product } from "@/content/schema";
+import { localeHref, type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { panelColors, PanelText } from "./panel";
 
 /** Two products side by side, each in its own color, split across the full width. */
-export function DuoPanels({ products }: { products: Product[] }) {
+export function DuoPanels({ products, locale = "en" }: { products: Product[]; locale?: Locale }) {
+  const t = getDictionary(locale);
   return (
     <div className="grid md:grid-cols-2">
       {products.map((p) => {
@@ -32,12 +36,13 @@ export function DuoPanels({ products }: { products: Product[] }) {
                   publisher={p.publisher}
                   stores={p.stores}
                   brand={p.brandColor}
-                  href={`/apps/${p.slug}`}
+                  href={localeHref(locale, `/apps/${p.slug}`)}
                   headingId={`show-${p.slug}`}
+                  locale={locale}
                 />
               </div>
               <Reveal className="hidden self-end lg:block">
-                <PhoneFrame src={p.screenshots[0]} alt={`${p.name} screen`} width={200} style={{ marginBottom: "-18%" }} />
+                <PhoneFrame src={p.screenshots[0]} alt={t.screen(localName(p, locale))} width={200} style={{ marginBottom: "-18%" }} />
               </Reveal>
             </div>
           </article>

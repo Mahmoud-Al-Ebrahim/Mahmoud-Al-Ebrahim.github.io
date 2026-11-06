@@ -31,3 +31,17 @@ export const fontMono = localFont({
 });
 
 export const fontClassNames = [fontLatin.variable, fontArabic.variable, fontMono.variable].join(" ");
+
+/**
+ * Arabic pages load the Arabic face up front: there it is the body text,
+ * not an occasional product name.
+ */
+export const fontArabicPreloaded = localFont({
+  src: "../assets/fonts/readex-arabic.woff2",
+  variable: "--font-arabic-face",
+  display: "swap",
+  weight: "160 700",
+  preload: true,
+});
+
+export const fontClassNamesArabic = [fontLatin.variable, fontArabicPreloaded.variable, fontMono.variable].join(" ");

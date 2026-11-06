@@ -15,9 +15,11 @@ const NODES: DiagramNode[] = [
   { id: "di", label: "injectable DI", detail: "get_it graph generated from annotations. Every layer receives its dependencies; nothing constructs its own collaborators." },
 ];
 
-export function CleanArchitectureDiagram({ compact = false }: DiagramProps) {
+export function CleanArchitectureDiagram({ compact = false, locale = "en" }: DiagramProps) {
   return (
     <DiagramFrame
+      diagramId="clean-architecture"
+      locale={locale}
       title="The playbook"
       description="Feature-first Clean Architecture as used in Safeer, Min Bayty, Trydos and the EdTech family. Data flows down as calls and comes back as Either values."
       nodes={NODES}

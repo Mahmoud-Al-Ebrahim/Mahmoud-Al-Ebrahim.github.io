@@ -4,15 +4,26 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { IconClose, IconDownload, IconMenu } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { siteConfig } from "@/content/site";
-import { NAV } from "./nav-links";
+import type { Locale } from "@/i18n/config";
+import { LanguageSwitch } from "./language-switch";
+import type { NavItem } from "./nav-links";
 import { NavLink } from "./nav-link";
+
+type Labels = {
+  open: string;
+  close: string;
+  dialog: string;
+  downloadCv: string;
+  primary: string;
+  theme: { toLight: string; toDark: string };
+};
 
 /**
  * Full-screen menu for small screens. The close button lives inside the panel
  * so it is always on top and reachable by touch; focus is trapped while open
  * and returns to the trigger on close.
  */
-export function MobileMenu() {
+export function MobileMenu({ locale, items, labels, location }: { locale: Locale; items: NavItem[]; labels: Labels; location: string }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -63,7 +74,7 @@ export function MobileMenu() {
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-controls="mobile-menu"
-        aria-label="Open menu"
+        aria-label={labels.open}
         className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-rule text-ink hover:border-ink"
       >
         <IconMenu />
@@ -75,7 +86,7 @@ export function MobileMenu() {
           ref={panelRef}
           role="dialog"
           aria-modal="true"
-          aria-label="Site menu"
+          aria-label={labels.dialog}
           className="fixed inset-0 z-50 flex flex-col bg-paper px-gutter pb-8"
         >
           <div className="flex h-16 items-center justify-between border-b border-rule">
@@ -83,7 +94,7 @@ export function MobileMenu() {
             <button
               type="button"
               onClick={close}
-              aria-label="Close menu"
+              aria-label={labels.close}
               aria-expanded="true"
               aria-controls="mobile-menu"
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-rule text-ink hover:border-ink"
@@ -91,9 +102,9 @@ export function MobileMenu() {
               <IconClose />
             </button>
           </div>
-          <nav aria-label="Primary" className="mt-6">
+          <nav aria-label={labels.primary} className="mt-6">
             <ul className="flex flex-col">
-              {NAV.map((item) => (
+              {items.map((item) => (
                 <li key={item.href} className="border-b border-rule">
                   <NavLink href={item.href} label={item.label} onClick={() => setOpen(false)} className="block py-4 text-step-4 font-semibold tracking-tight after:hidden" />
                 </li>
@@ -101,12 +112,13 @@ export function MobileMenu() {
             </ul>
           </nav>
           <div className="mt-8 flex items-center gap-3">
-            <a href={siteConfig.resumePath} download className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 font-medium text-paper">
-              <IconDownload /> Download CV
+            <a href={siteConfig.resumePath} download className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ink px-5 py-2.5 font-medium text-paper">
+              <IconDownload /> {labels.downloadCv}
             </a>
-            <ThemeToggle />
+            <ThemeToggle labels={labels.theme} />
+            <LanguageSwitch locale={locale} onNavigate={() => setOpen(false)} />
           </div>
-          <p className="mt-auto text-step--1 text-muted">{siteConfig.location}</p>
+          <p className="mt-auto text-step--1 text-muted">{location}</p>
         </div>
       ) : null}
     </div>

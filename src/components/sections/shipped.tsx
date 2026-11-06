@@ -5,14 +5,16 @@ import { LabeenyPanel } from "@/components/showcase/labeeny-panel";
 import { MinBaytyPanel } from "@/components/showcase/min-bayty-panel";
 import { panelColors } from "@/components/showcase/panel";
 import { Container } from "@/components/ui/container";
-import { ROLE_LABELS, type Product } from "@/content/schema";
+import type { Product } from "@/content/schema";
+import type { Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { getFamily, getFamilyMembers, getProduct, getProducts } from "@/lib/content";
 import { storeUrls } from "@/lib/stores";
 
 const DUO = ["birdy-consults", "sayed"];
 
-function must(slug: string): Product {
-  const p = getProduct(slug);
+function must(slug: string, locale: Locale): Product {
+  const p = getProduct(slug, locale);
   if (!p) throw new Error(`[shipped] missing product ${slug}`);
   return p;
 }
@@ -22,16 +24,17 @@ function must(slug: string): Product {
  * Labeeny (two apps), the EdTech family (scroll story), Min Bayty (fan),
  * Birdy Consults and Sayed (two-up), then the rest as a list.
  */
-export function Shipped() {
-  const labeeny = must("labeeny");
-  const captain = getProduct("captain-labeeny");
-  const minBayty = must("min-bayty");
-  const family = getFamily("fahim-edtech");
+export function Shipped({ locale = "en" }: { locale?: Locale }) {
+  const t = getDictionary(locale);
+  const labeeny = must("labeeny", locale);
+  const captain = getProduct("captain-labeeny", locale);
+  const minBayty = must("min-bayty", locale);
+  const family = getFamily("fahim-edtech", locale);
   if (!family) throw new Error("[shipped] missing family");
-  const members = getFamilyMembers(family);
-  const duo = DUO.map(must);
+  const members = getFamilyMembers(family, locale);
+  const duo = DUO.map((slug) => must(slug, locale));
   const shown = new Set(["labeeny", "captain-labeeny", "min-bayty", ...DUO, ...family.members]);
-  const rest = getProducts().filter((p) => !shown.has(p.slug));
+  const rest = getProducts(locale).filter((p) => !shown.has(p.slug));
 
   const chapters: StoryChapter[] = members.map((m) => ({
     slug: m.slug,
@@ -40,7 +43,7 @@ export function Shipped() {
     icon: m.icon,
     tagline: m.tagline,
     highlights: m.highlights,
-    roleText: `${m.roleLabel ?? ROLE_LABELS[m.role]} for ${m.publisher}`,
+    roleText: t.roleFor(m.roleLabel ?? t.roles[m.role], m.publisher),
     screen: m.screenshots[0],
     colors: panelColors(m.brandColor),
     stores: storeUrls(m.stores),
@@ -51,16 +54,15 @@ export function Shipped() {
       <Container width="wide" className="pb-12 pt-20 md:pb-16 md:pt-28">
         <div className="grid gap-6 md:grid-cols-12 md:gap-8">
           <h2 id="apps-title" className="text-step-5 md:col-span-6">
-            Shipped to the stores
+            {t.shipped.title}
           </h2>
           <p className="max-w-[50ch] self-end text-step-1 text-muted md:col-span-5 md:col-start-8">
-            Real products with real users, built for publishers in Syria. Each one below says what I engineered, not just what
-            the app does, and links to its case study and store pages.
+            {t.shipped.lede}
           </p>
         </div>
       </Container>
       <div data-testid="featured-apps">
-        <LabeenyPanel product={labeeny} captain={captain} />
+        <LabeenyPanel product={labeeny} captain={captain} locale={locale} />
         <EdTechStory
           familyName={family.name}
           familyNameAr={family.nameAr}
@@ -68,11 +70,12 @@ export function Shipped() {
           familyHighlights={family.highlights}
           familyHref={`/apps/${family.slug}`}
           chapters={chapters}
+          locale={locale}
         />
-        <MinBaytyPanel product={minBayty} />
-        <DuoPanels products={duo} />
+        <MinBaytyPanel product={minBayty} locale={locale} />
+        <DuoPanels products={duo} locale={locale} />
       </div>
-      <AlsoShipped products={rest} />
+      <AlsoShipped products={rest} locale={locale} />
     </section>
   );
 }

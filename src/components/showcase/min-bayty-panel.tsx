@@ -1,10 +1,14 @@
 import { Reveal } from "@/components/motion/reveal";
 import { PhoneFrame } from "@/components/ui/phone-frame";
+import { localName } from "@/components/ui/arabic-name";
 import type { Product } from "@/content/schema";
+import { localeHref, type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { Panel, PanelText } from "./panel";
 
 /** A fan of three screens: home, catalog, search. Text sits beside on desktop. */
-export function MinBaytyPanel({ product }: { product: Product }) {
+export function MinBaytyPanel({ product, locale = "en" }: { product: Product; locale?: Locale }) {
+  const t = getDictionary(locale);
   const shots = product.screenshots.slice(0, 3);
   const tilt = ["-8deg", "0deg", "8deg"];
   return (
@@ -23,8 +27,9 @@ export function MinBaytyPanel({ product }: { product: Product }) {
             publisher={product.publisher}
             stores={product.stores}
             brand={product.brandColor}
-            href={`/apps/${product.slug}`}
+            href={localeHref(locale, `/apps/${product.slug}`)}
             headingId="show-min-bayty"
+            locale={locale}
           />
         </div>
         <Reveal className="md:col-span-7">
@@ -33,7 +38,7 @@ export function MinBaytyPanel({ product }: { product: Product }) {
               <PhoneFrame
                 key={src}
                 src={src}
-                alt={`${product.name} screen ${i + 1}`}
+                alt={t.screenN(localName(product, locale), i + 1)}
                 width={i === 1 ? 280 : 240}
                 className={i === 1 ? "z-10 w-[40%]" : "drift w-[34%]"}
                 style={{
