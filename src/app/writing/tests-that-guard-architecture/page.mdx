@@ -1,0 +1,54 @@
+import { ArticleLayout } from "@/components/writing/article-layout";
+
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: "Tests that protect architecture, not just logic",
+  description:
+    "Four source-scanning tests that fail when a Bloc event has no screen, a string is hardcoded Arabic, a sign-out forgets a Bloc, or a shell re-provides a root Bloc.",
+  path: "/writing/tests-that-guard-architecture",
+});
+
+<ArticleLayout slug="tests-that-guard-architecture">
+
+The bugs that cost me the most time in fashion_store were never wrong calculations. They were forgotten wiring: an event that no screen dispatched any more, an Arabic string typed straight into a widget, a Bloc that kept the previous customer's wallet after sign-out. Unit tests do not see that class of defect, because each unit is correct on its own. So I wrote tests that read the source tree instead.
+
+## The setup
+
+fashion_store is a Flutter client for a fashion marketplace with five roles, seventeen Blocs and ninety-seven endpoints, maintained by one person. Every Bloc follows one template: an enum of statuses per action, a `copyWith` state, and a `Clear` event. Two locale files hold around six hundred keys each. The conventions are simple and easy to break quietly.
+
+The tests use `dart:io` to walk `lib/`, read files as text and assert rules with regular expressions. They run with `flutter test` like any other test, take under a second, and fail with a message that names the offending file.
+
+## Test 1: every endpoint event has a screen
+
+Each Bloc event that calls an endpoint is matched against the widget tree: somewhere, some screen must `add` it. The test collects event class names from the Bloc files, then searches the presentation folder for `add(EventName(`. A short allowlist covers events dispatched programmatically from other Blocs. When a screen is refactored and an event quietly becomes unreachable, the build fails with the event's name.
+
+## Test 2: no hardcoded Arabic, and the locale files agree
+
+A regular expression for the Arabic Unicode block scans every Dart file outside the generated locale keys. Any match is a string that bypassed localization. The same test loads both locale JSON files and asserts they have identical key sets, and that every constant in the typed keys class resolves to a key. Together they make "forgot to translate" a compile-time error rather than a bug report from a user in another language.
+
+## Test 3: sign-out clears every Bloc
+
+All Blocs in this app are provided at the root, by design, so pushed routes can reach them. The price is that state outlives the session unless something clears it. The test asserts two things: every Bloc file declares a `Clear` event, and every sign-out call site goes through the single `clearSessionBlocs` helper, which must reference every Bloc. Adding a Bloc without adding it to the helper fails the build.
+
+## Test 4: no shell re-provides a root Bloc
+
+With root-scoped Blocs, a well-meaning `BlocProvider` inside a role shell silently creates a second instance and splits the state. The test scans the shells for `BlocProvider(create:` of any root Bloc type and fails on a match.
+
+## Why this beats more unit tests
+
+These four tests took an afternoon. They encode conventions the codebase already had and that I had already broken more than once. A unit test asks "does this function compute the right thing"; these ask "is the app still wired the way we agreed". For a solo project without reviewers, the second question is the one that goes unanswered.
+
+The cost is coupling to conventions. Rename the `Clear` event pattern and the test must change too. That is not a drawback; it is the test doing its job of making the convention explicit.
+
+## The ordinary tests still matter
+
+The same suite has conventional tests where the logic is real: order cancellation rules and a minimum age, parsing offset-less server timestamps as UTC to fix a three-hour skew, repairing UTF-8 that arrived double-encoded through SignalR long polling, and Arabic hamza normalisation in a color filter. Thirteen files, roughly fifteen hundred lines, no mocks of the framework.
+
+## What I would do differently
+
+Write the structural tests on day one, before the conventions exist, and let them define the conventions. The next addition is a test that every Bloc event calling the network goes through the shared API service rather than building its own request.
+
+Source: fashion_store, personal project, August to September 2026.
+
+</ArticleLayout>

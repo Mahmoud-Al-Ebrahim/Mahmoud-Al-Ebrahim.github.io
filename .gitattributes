@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.woff2 binary
+*.png binary
+*.webp binary
+*.pdf binary
+docs/discovery export-ignore
+docs/superpowers export-ignore
+.superpowers export-ignore

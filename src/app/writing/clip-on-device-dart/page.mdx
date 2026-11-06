@@ -1,0 +1,54 @@
+import { ArticleLayout } from "@/components/writing/article-layout";
+
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: "Running CLIP on a phone, in Dart",
+  description:
+    "How a Flutter gallery app searches photos by description without a server: a hand-ported BPE tokenizer, two TFLite encoders behind a worker isolate, and an embedding cache keyed by file hash.",
+  path: "/writing/clip-on-device-dart",
+});
+
+<ArticleLayout slug="clip-on-device-dart">
+
+Phone galleries are good at "photos from March" and bad at "the receipt from the pharmacy". Cloud services solve the second kind of search by uploading every photo. Gallery AI set out to answer "the dog on the beach" on the device, with nothing leaving it. This is how the pipeline works and what it cost to build in Dart.
+
+## What CLIP gives you
+
+CLIP is a pair of encoders trained together: one turns an image into a vector, the other turns a sentence into a vector in the same space. If the image and the sentence describe the same thing, the vectors point roughly the same way. Search is then just arithmetic: encode every photo once, encode the query when the user types, and rank photos by cosine similarity.
+
+That arithmetic is cheap. The expensive parts are everything around it: getting the models to run on a phone, producing the exact token ids the text encoder expects, and not recomputing twenty thousand image vectors every time the app starts.
+
+## Two models, one interpreter each
+
+Both encoders were exported to TensorFlow Lite and shipped in the app bundle. At startup the app copies them from the asset bundle into application support storage and opens each with `Interpreter.fromFile`. The image encoder takes a 224 by 224 RGB tensor normalized to the range the model was trained on; the text encoder takes a fixed sequence of 77 token ids.
+
+Loading an interpreter is slow and holding two of them costs memory, so they must be loaded once and reused. That rules out `compute()`, which spins up a fresh isolate per call. Instead the app owns a long-lived worker isolate with a small message protocol: an init message carrying the model paths, embed-job messages carrying an image path, and embed-result messages carrying the vector back. The main isolate never touches the interpreters; the UI stays responsive while thousands of photos are indexed in the background.
+
+## The tokenizer nobody ships for Dart
+
+The text encoder is useless without CLIP's byte-level BPE tokenizer, and there was no Dart implementation. The port is 294 lines. It builds the byte-to-unicode table, loads the merges vocabulary from the bundled text file, applies the pair-ranking merge loop, and caches results per word so repeated queries are instant.
+
+The non-negotiable requirement is byte-for-byte compatibility with the reference implementation: if the token ids are off by one, the text vector lands in the wrong part of the space and every search silently returns nonsense. Validating against known token sequences before wiring it to the model was the single most valuable hour of the project.
+
+## Caching embeddings
+
+Indexing a library is an interruptible job, not a startup task. Each image vector is written as JSON into an `embeds` folder under application support, keyed by the SHA-1 of the file path, and a small path-to-file index lives in shared preferences. On the next launch the app diffs the gallery against the index and only encodes new or changed files. An interrupted index resumes where it stopped.
+
+Search loads the cached vectors into memory and runs a brute-force cosine scan with a similarity threshold, sorted descending. For a personal library of tens of thousands of photos this takes a fraction of a second on a mid-range Android phone. It would not scale to millions, and it does not need to; an approximate index is the obvious next step if it ever does.
+
+## Videos
+
+Videos get the same treatment by sampling. The app extracts four evenly spaced frames with a thumbnail library, encodes each, and averages the vectors into one embedding for the video. Averaging loses detail but keeps retrieval honest: a clip of a dog on a beach still matches "dog on the beach". Each frame extraction runs behind its own completer with a 20-second timeout, because one corrupt file must not stall the whole batch.
+
+## Queries in Arabic
+
+Users type in Arabic; CLIP was trained on English captions. Rather than ship a multilingual model, the app runs the query through on-device language identification and translation from ML Kit, then encodes the English text. It is not perfect, and it is entirely offline.
+
+## What I would do differently
+
+The pipeline grew inside a single search screen that is now 1,600 lines long. The next version moves tokenizer, worker and cache behind a Bloc so each piece can be tested on its own, and replaces the brute-force scan with a small vector index. The isolate protocol was the right call and is the part I would keep exactly as it is.
+
+Source: Gallery AI, a two-person project, 2025. Model weights are not part of the repository.
+
+</ArticleLayout>

@@ -1,0 +1,106 @@
+import { ArticleLayout } from "@/components/writing/article-layout";
+
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: "One repository method to replace fourteen",
+  description:
+    "A generic Either-returning call wrapper that checks connectivity, hits the remote source, falls back to cache and maps failures, so feature repositories shrink to one line each.",
+  path: "/writing/generic-network-repository",
+});
+
+<ArticleLayout slug="generic-network-repository">
+
+Clean Architecture in Flutter is often sold with a diagram and delivered with boilerplate. The repository layer is where it hurts most: every method checks the network, calls a data source, catches exceptions, maps them to failures and maybe writes a cache. By the third feature you are copying twenty lines and changing one. Safeer, a two-sided delivery app with fourteen repositories, is where I stopped copying.
+
+## The shape of the problem
+
+A typical repository method looked like this before the change:
+
+```dart
+@override
+Future<Either<Failure, List<Order>>> getOrders() async {
+  if (!await networkInfo.isConnected) {
+    return Left(OfflineFailure());
+  }
+  try {
+    final result = await remote.getOrders();
+    return Right(result);
+  } on ServerException catch (e) {
+    return Left(ServerFailure(e.message));
+  } on DioException catch (e) {
+    return Left(DioFailure(e));
+  }
+}
+```
+
+Multiply by every method in every repository. The variation between them is the remote call and, sometimes, a cache read or write. Everything else is identical and, worse, identically likely to drift: one method forgets the offline check, another maps a new exception type, a third logs and the rest do not.
+
+## One generic call
+
+The replacement is a single function on a small base class, parameterized by what actually varies:
+
+```dart
+Future<Either<Failure, T>> call<T>({
+  required Future<T> Function() remote,
+  Future<T> Function()? local,
+  Future<void> Function(T data)? cache,
+}) async {
+  if (await networkInfo.isConnected) {
+    try {
+      final data = await remote();
+      if (cache != null) await cache(data);
+      return Right(data);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on DioException catch (e) {
+      return Left(DioFailure(e));
+    }
+  }
+  if (local != null) {
+    try {
+      return Right(await local());
+    } on EmptyCacheException {
+      return Left(EmptyCacheFailure());
+    }
+  }
+  return Left(OfflineFailure());
+}
+```
+
+A feature repository becomes a list of delegations:
+
+```dart
+@override
+Future<Either<Failure, List<Order>>> getOrders() =>
+    call(remote: remoteSource.getOrders);
+
+@override
+Future<Either<Failure, Cart>> getCart() => call(
+      remote: remoteSource.getCart,
+      local: localSource.getCart,
+      cache: localSource.saveCart,
+    );
+```
+
+The connectivity rule, the failure mapping and the cache-then-fallback order now exist in exactly one place, and that place has a test.
+
+## Why a function and not a base class with overrides
+
+The first draft was a template-method base class: subclasses override `fetchRemote` and `fetchLocal`. It removed the duplication but hid which repository did what, and a repository with two methods needed two subclasses. Passing the fetchers as parameters keeps every method readable at the call site and lets an unusual method skip the wrapper entirely. Composition won over inheritance for the usual reasons; it just took one wrong draft to see it.
+
+## What the UI gets
+
+Because every repository returns the same `Either<Failure, T>`, the presentation layer can standardize too. A `BlocStateData<T>` wrapper carries init, loading, success and failed, with data allowed during loading so a refresh does not blank the screen, and a builder widget renders default loading and failure states unless a screen overrides them. Eighteen Blocs share that one contract.
+
+## Limits
+
+The wrapper assumes one remote source per call and a cache that stores the whole result. Partial updates, pagination merges and conflict resolution still need hand-written methods, and that is fine: the wrapper handles the ninety percent so the remaining ten percent gets attention. The same wrapper, with the same shape, later carried Min Bayty's repositories.
+
+## What I would do differently
+
+Add the cache hooks only when the first feature needs them. The initial version shipped with `local` and `cache` parameters that no feature used for months; they were right in the end, but they were speculation at the time.
+
+Source: Safeer and Min Bayty, ProoTech, 2025.
+
+</ArticleLayout>

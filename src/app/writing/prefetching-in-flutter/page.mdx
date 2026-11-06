@@ -1,0 +1,58 @@
+import { ArticleLayout } from "@/components/writing/article-layout";
+
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: "Hiding latency with prefetching in Flutter",
+  description:
+    "Fetching the next screen's data while the user is still on this one: where it helps, where it wastes bandwidth, and how to keep it cancellable.",
+  path: "/writing/prefetching-in-flutter",
+});
+
+<ArticleLayout slug="prefetching-in-flutter">
+
+A list screen that takes a second to open its detail page feels slow no matter how fast the detail page renders. The request is the delay. Prefetching moves that request earlier, to a moment when the user is still reading the list, so the detail page opens with its data already in hand. This note describes the technique I use in Flutter apps and the rules that keep it from backfiring.
+
+## The idea
+
+When a list of items renders, you can predict with reasonable confidence which detail screens the user might open next: the ones on screen. Start their requests immediately, store the futures in a small cache keyed by item id, and when the user taps, hand the detail screen the future instead of a fresh request. If the request already finished, the screen opens instantly; if not, it waits for the remainder rather than the whole round trip.
+
+```dart
+final _prefetched = <String, Future<ItemDetail>>{};
+
+void prefetch(String id) {
+  _prefetched.putIfAbsent(id, () => api.getItemDetail(id));
+}
+
+Future<ItemDetail> detail(String id) {
+  return _prefetched.remove(id) ?? api.getItemDetail(id);
+}
+```
+
+The `remove` on read matters: a prefetched future is a one-shot optimization, not a cache. If the user opens the same item twice, the second open goes through the normal path and whatever caching policy the app already has.
+
+## When to trigger it
+
+Prefetch on visibility, not on render. A long list renders far more items than the user sees; prefetching all of them is a traffic spike for nothing. A visibility-aware list widget, or the viewport callbacks of a sliver list, tells you which items are actually on screen. Prefetch those, and prefetch again as the user scrolls.
+
+Prefetch on intent when you can. A press-down on a card, a hover on desktop, or the first frame of a page transition are all earlier than the tap that commits navigation, and all strong signals.
+
+## Keep it cancellable
+
+A user who scrolls quickly past fifty items should not pay for fifty detail requests. Each prefetch carries a cancel token from the HTTP client, and when an item leaves the viewport without being tapped, its token is canceled and its entry dropped. On a metered connection this is the difference between a technique that helps and one that users notice on their bill.
+
+## Where it does not belong
+
+Prefetching is wrong for anything expensive, mutable or personalised beyond the current user. Do not prefetch a payment form, a search with side effects, or a resource that invalidates quickly. Do not prefetch on cellular when the payload is large. The gain is latency hidden behind reading time; if there is no reading time, as in a search results page the user scans in a second, the technique buys nothing.
+
+## Measuring
+
+Log two numbers: how often a detail open found a completed prefetch, and how many prefetches were canceled or never used. The first tells you whether the technique works; the second tells you what it costs. In the example repository, a list of twenty items with visibility-triggered prefetch opened detail pages instantly in the common case while issuing only the requests for items that had actually been seen.
+
+## What I would do differently
+
+Put the prefetch cache behind the same repository interface as normal reads, so the detail Bloc does not know whether its data was prefetched. In the example it is a separate service, which is fine for a demo and a leak of mechanism in a real app.
+
+Source: prefetch_technique_example, a public repository, 2024.
+
+</ArticleLayout>
