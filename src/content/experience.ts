@@ -5,6 +5,18 @@ type Input = z.input<typeof ExperienceEntrySchema>;
 
 export const experience: Input[] = [
   {
+    company: "Freelance",
+    role: "Flutter Developer",
+    start: "2026-07",
+    end: "present",
+    location: "Aleppo, Syria (remote clients)",
+    bullets: [
+      "Delivered Coursaty for Prootech, a course platform published on Google Play and the App Store with student and teacher roles in one app.",
+      "Built offline lecture downloads, resumable TUS video uploads to Bunny Stream, quizzes, activation-code subscriptions and teacher revenue tracking, and hardened the app with real-device, screen-lock and emulator checks.",
+    ],
+    stack: ["Flutter", "Bloc", "HydratedBloc", "go_router", "injectable", "TUS", "Bunny Stream"],
+  },
+  {
     company: "KwanX",
     role: "Senior Flutter Developer",
     start: "2026-01",

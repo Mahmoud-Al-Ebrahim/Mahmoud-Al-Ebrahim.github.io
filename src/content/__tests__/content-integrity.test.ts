@@ -71,12 +71,13 @@ describe("content integrity", () => {
     }
   });
 
-  it("sorts experience newest first, with teaching as the only open-ended entry", () => {
+  it("sorts experience newest first, with at most one open-ended role besides teaching", () => {
     const entries = getExperience();
     for (let i = 1; i < entries.length; i++) {
       expect(entries[i - 1].start >= entries[i].start).toBe(true);
     }
     const open = entries.filter((e) => e.end === "present");
-    expect(open.every((e) => e.teaching)).toBe(true);
+    // Teaching runs alongside; at most one current engagement besides it (freelance since July 2026).
+    expect(open.filter((e) => !e.teaching).length).toBeLessThanOrEqual(1);
   });
 });

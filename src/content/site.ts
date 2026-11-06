@@ -10,7 +10,7 @@ export const siteConfig = {
   github: "https://github.com/Mahmoud-Al-Ebrahim",
   location: "Aleppo, Syria",
   resumePath: "/Mahmoud-AlEbrahim.pdf",
-  currentRole: "Senior Flutter Developer, KwanX (January to July 2026)",
+  currentRole: "Freelance Flutter developer since July 2026",
   availability: "Open to senior Flutter and mobile-architecture roles, remote or hybrid.",
 } as const;
 

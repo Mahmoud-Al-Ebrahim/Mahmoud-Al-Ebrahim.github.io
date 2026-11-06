@@ -39,7 +39,7 @@ const en = {
 
   hero: {
     aria: "Introduction",
-    eyebrow: "Senior Flutter engineer in Aleppo, open to new roles.",
+    eyebrow: "Senior Flutter engineer in Aleppo. Freelancing, and open to full-time roles.",
     lede: "I architect and ship mobile products, and build the Node.js and GraphQL backends they run on.",
     body: (apps: number, listings: number) =>
       `${cap(words(apps))} apps across ${words(listings)} App Store and Google Play listings: delivery, exam prep, marketplaces, veterinary care and payments. I led teams on several of them and taught Flutter and algorithms to more than a thousand students along the way.`,
@@ -93,7 +93,7 @@ const en = {
 
   experience: {
     title: "Experience",
-    lede: "Five years shipping Flutter for delivery, commerce, education and health products, three of them leading teams, and eight years of teaching alongside.",
+    lede: "Five years shipping Flutter for delivery, commerce, education and health products, nearly three of them in senior and lead roles, and eight years of teaching alongside.",
     fullResume: "Full résumé",
     now: "now",
     to: "to",
@@ -236,7 +236,7 @@ const en = {
     description: "Get in touch with Mahmoud AlEbrahim about senior Flutter and mobile-architecture roles.",
     body: "Email is the fastest way to reach me. Tell me what you are building, the platforms you ship to, and what a good outcome looks like in three months; I reply within two working days. For a quick look at the work first, the apps collection has store links and the projects have case studies.",
     basedIn: "Based in",
-    currently: "Most recent role",
+    currently: "Currently",
     phone: "Phone",
     resume: "Résumé",
     download: "Download the PDF",
@@ -290,7 +290,7 @@ const ar: Dictionary = {
 
   hero: {
     aria: "مقدمة",
-    eyebrow: "مهندس Flutter أول في حلب، ومتاح لفرص عمل جديدة.",
+    eyebrow: "مهندس Flutter أول في حلب. أعمل بشكل حر، ومتاح لأدوار بدوام كامل.",
     lede: "أصمّم معمارية تطبيقات الهاتف وأطلقها، وأبني الواجهات الخلفية التي تعمل عليها باستخدام Node.js وGraphQL.",
     body: (apps, listings) =>
       `أطلقتُ ${arCount(apps, "تطبيقات", "تطبيقًا")} عبر ${arCount(listings, "صفحات", "صفحة")} في App Store وGoogle Play: توصيل، وتحضير للامتحانات، وأسواق إلكترونية، ورعاية بيطرية، ومدفوعات. قدتُ الفرق في عدد منها، ودرّستُ Flutter والخوارزميات لأكثر من ألف طالب خلال ذلك.`,
@@ -344,7 +344,7 @@ const ar: Dictionary = {
 
   experience: {
     title: "الخبرة",
-    lede: "خمس سنوات من إطلاق تطبيقات Flutter للتوصيل والتجارة والتعليم والصحة، ثلاث منها في قيادة الفرق، وثماني سنوات من التدريس بالتوازي.",
+    lede: "خمس سنوات من إطلاق تطبيقات Flutter للتوصيل والتجارة والتعليم والصحة، قرابة ثلاث منها في مناصب أولى وقيادية، وثماني سنوات من التدريس بالتوازي.",
     fullResume: "السيرة الذاتية كاملة",
     now: "الآن",
     to: "إلى",
@@ -486,7 +486,7 @@ const ar: Dictionary = {
     description: "تواصل مع Mahmoud AlEbrahim بخصوص أدوار Senior في Flutter ومعمارية تطبيقات الهاتف.",
     body: "البريد الإلكتروني أسرع طريقة للوصول إليّ. أخبرني بما تبنيه، والمنصات التي تستهدفها، وكيف تبدو النتيجة الجيدة بعد ثلاثة أشهر؛ أرد خلال يومَي عمل. وإن أردت إلقاء نظرة على العمل أولًا، ففي صفحة التطبيقات روابط المتاجر، وفي المشاريع دراسات الحالة.",
     basedIn: "مقيم في",
-    currently: "آخر منصب",
+    currently: "حاليًا",
     phone: "الهاتف",
     resume: "السيرة الذاتية",
     download: "تحميل ملف PDF (بالإنجليزية)",
