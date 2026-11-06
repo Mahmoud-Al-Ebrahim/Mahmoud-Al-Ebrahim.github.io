@@ -8,7 +8,7 @@ export const experience: Input[] = [
     company: "KwanX",
     role: "Senior Flutter Developer",
     start: "2026-01",
-    end: "present",
+    end: "2026-07",
     location: "Aleppo, Syria",
     bullets: [
       "Architected and delivered a production real-time, multi-role delivery platform (Labeeny customer and captain apps) with Flutter and GraphQL on Hasura.",

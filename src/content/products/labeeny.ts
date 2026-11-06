@@ -59,7 +59,7 @@ export const labeeny: ProductInput = {
     "Shipped under GitLab CI/CD with enforced review and branching standards.",
   ],
   contribution:
-    "Senior Flutter developer at KwanX since January 2026. The CV records architecting and delivering the real-time, multi-role system, designing the Clean Architecture and the subscription, caching and optimistic-update data layer, and enforcing CI/CD and review standards. Source code is not included in this portfolio.",
+    "Senior Flutter developer at KwanX from January to July 2026. The CV records architecting and delivering the real-time, multi-role system, designing the Clean Architecture and the subscription, caching and optimistic-update data layer, and enforcing CI/CD and review standards. Source code is not included in this portfolio.",
   highlights: [
     "GraphQL subscriptions on Hasura keep the customer and captain apps on one live order state",
     "A data layer with caching, optimistic updates and structured error handling behind Clean Architecture boundaries",

@@ -71,12 +71,12 @@ describe("content integrity", () => {
     }
   });
 
-  it("sorts experience newest first with teaching as the only second open-ended entry", () => {
+  it("sorts experience newest first, with teaching as the only open-ended entry", () => {
     const entries = getExperience();
     for (let i = 1; i < entries.length; i++) {
       expect(entries[i - 1].start >= entries[i].start).toBe(true);
     }
     const open = entries.filter((e) => e.end === "present");
-    expect(open.filter((e) => !e.teaching)).toHaveLength(1);
+    expect(open.every((e) => e.teaching)).toBe(true);
   });
 });
